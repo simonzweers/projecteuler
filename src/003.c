@@ -24,10 +24,12 @@ uint64_t double_dabble(uint64_t original) {
   uint8_t num_size = 0;
   for (uint8_t i = 0; i < 8; i++) {
     int index = 8 - i - 1;
-    if () {
-      num_size = i + 1;
-      break;
-    }
+    /*
+if () {
+  num_size = i + 1;
+  break;
+}
+    */
   }
   printf("num_size: %d\n", num_size);
 
@@ -49,12 +51,20 @@ uint64_t double_dabble(uint64_t original) {
   return num >> 8;
 }
 
+uint32_t get_bcd(uint32_t decimal) {
+  uint32_t ret = 0;
+  uint8_t shift = 0;
+
+  while (decimal > 0) {
+    ret |= (decimal % 10) << (shift++ * 4);
+    decimal /= 10;
+  }
+  return ret;
+}
+
 int main() {
-  uint16_t num = 243;
-  uint64_t numbcd = double_dabble(num);
-  print_binary(numbcd, 64);
-  printf("\n");
-  uint16_t num2 = 65244;
-  uint64_t num2bcd = double_dabble(num2);
-  print_binary(num2bcd, 32);
+  uint32_t num1 = get_bcd(243);
+  print_binary(num1, 32);
+  uint32_t num2 = get_bcd(65244);
+  print_binary(num2, 32);
 }
