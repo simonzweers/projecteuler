@@ -1,7 +1,7 @@
 CC=$(shell which gcc)
 CXX=$(shell which g++)
 
-CFLAGS=-Wall -g
+CFLAGS=-Wall -O3
 
 C_SRC=$(wildcard c/*.c)
 CPP_SRC=$(wildcard cpp/*.cpp)
