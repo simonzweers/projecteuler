@@ -5,6 +5,13 @@
 #include <cstdint>
 #include <vector>
 #include <cmath>
+#include <chrono>
+
+using std::chrono::high_resolution_clock;
+using std::chrono::duration_cast;
+using std::chrono::duration;
+using std::chrono::milliseconds;
+using std::chrono::nanoseconds;
 
 typedef struct {
     uint64_t base;
@@ -38,6 +45,9 @@ int main() {
         // std::printf("b: %ld, e: %ld\n", pair_tmp.base, pair_tmp.exponent);
     }
 
+
+    auto t1 = high_resolution_clock::now();
+
     double highest = 0;
     int linei = 1;
     int line;
@@ -52,7 +62,11 @@ int main() {
         linei++;
     }
 
+    auto t2 = high_resolution_clock::now();
+    auto ms_int = duration_cast<nanoseconds>(t2 - t1);
+
     std::printf("Line with highest result: %d\n", line);
+    std::printf("duration %lfs\n", ((double)ms_int.count()) * (pow(10, -9)));
     f.close();
     return 0;
 }
