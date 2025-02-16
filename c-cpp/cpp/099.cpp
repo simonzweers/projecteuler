@@ -1,25 +1,27 @@
+#include <chrono>
+#include <cmath>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
-#include <string>
 #include <sstream>
-#include <cstdint>
+#include <string>
+#include <thread>
 #include <vector>
-#include <cmath>
-#include <chrono>
 
-using std::chrono::high_resolution_clock;
-using std::chrono::duration_cast;
 using std::chrono::duration;
+using std::chrono::duration_cast;
+using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
 using std::chrono::nanoseconds;
 
 typedef struct {
     uint64_t base;
     uint64_t exponent;
+    double logexp;
 } base_exp_t;
 
 double get_log(base_exp_t &p) {
-    return (double)p.exponent * log10((double) p.base); 
+    return (double)p.exponent * log10((double)p.base);
 }
 
 int main() {
@@ -31,7 +33,7 @@ int main() {
 
     std::string s;
     std::vector<base_exp_t> pairs;
-    while(std::getline(f, s)) {
+    while (std::getline(f, s)) {
         std::string t;
         std::stringstream ss{s};
         base_exp_t pair_tmp;
@@ -39,22 +41,24 @@ int main() {
         std::getline(ss, t, ',');
         pair_tmp.base = std::stoul(t);
         std::getline(ss, t, ',');
-        pair_tmp.exponent = std::stoul(t); 
+        pair_tmp.exponent = std::stoul(t);
 
         pairs.push_back(pair_tmp);
         // std::printf("b: %ld, e: %ld\n", pair_tmp.base, pair_tmp.exponent);
     }
 
+    uint32_t num_threads = std::thread::hardware_concurrency();
+    std::printf("Number of threads: %d\n", num_threads);
 
     auto t1 = high_resolution_clock::now();
 
     double highest = 0;
     int linei = 1;
     int line;
-    for (auto &pair : pairs)
-    {
+    for (auto &pair : pairs) {
         double res = get_log(pair);
-        // std::printf("b: %ld, e: %ld, log %f\n", pair.base, pair.exponent, res);
+        // std::printf("b: %ld, e: %ld, log %f\n", pair.base, pair.exponent,
+        // res);
         if (res > highest) {
             highest = res;
             line = linei;
@@ -66,7 +70,7 @@ int main() {
     auto ms_int = duration_cast<nanoseconds>(t2 - t1);
 
     std::printf("Line with highest result: %d\n", line);
-    std::printf("duration %lfs\n", ((double)ms_int.count()) * (pow(10, -9)));
+    std::printf("duration %lfms\n", ((double)ms_int.count()) * (pow(10, -6)));
     f.close();
     return 0;
 }
