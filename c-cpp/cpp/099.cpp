@@ -1,10 +1,12 @@
 #include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <sys/types.h>
 #include <thread>
 #include <vector>
 
@@ -24,13 +26,34 @@ double get_log(base_exp_t &p) {
     return (double)p.exponent * log10((double)p.base);
 }
 
-uint32_t euler99(std::vector<base_exp_t> &pairs) {
+uint32_t solution_part(
+		std::vector<base_exp_t> &pairs,
+		uint32_t begin,
+		uint32_t end
+		) {
+	
+    double highest = 0;
+    int line = 0;
+    for (uint32_t i = begin; i < end; ++i) {
+        double res = get_log(pairs[i]);
+        // std::printf("b: %ld, e: %ld, log %f\n", pair.base, pair.exponent,
+        // res);
+        if (res > highest) {
+            highest = res;
+            line = i;
+        }
+    }
+	return line;
+}
+
+uint32_t euler99_st(std::vector<base_exp_t> &pairs) {
 
     double highest = 0;
     int linei = 1;
     int line = 0;
-    for (auto &pair : pairs) {
-        double res = get_log(pair);
+
+    for (uint32_t i = 0; i < pairs.size(); ++i) {
+        double res = get_log(pairs[i]);
         // std::printf("b: %ld, e: %ld, log %f\n", pair.base, pair.exponent,
         // res);
         if (res > highest) {
@@ -39,7 +62,33 @@ uint32_t euler99(std::vector<base_exp_t> &pairs) {
         }
         linei++;
     }
-    return line;
+
+	return line;
+}
+
+uint32_t euler99_mt(std::vector<base_exp_t> &pairs) {
+
+    double highest = 0;
+    int linei = 1;
+    int line = 0;
+	uint32_t left = 0;
+	uint32_t middle = pairs.size() / 2;
+	uint32_t end = pairs.size();
+	
+	uint32_t leftMax = solution_part(
+			pairs,
+			left,
+			middle
+	);
+	uint32_t rightMax = solution_part(
+			pairs,
+			middle,
+			end
+	);
+	line = leftMax;
+	if ( rightMax > leftMax)
+		line = rightMax;
+    return line + 1;
 }
 
 int read_file(std::vector<base_exp_t> &pairs) {
@@ -74,7 +123,7 @@ int main() {
     std::vector<base_exp_t> pairs;
     read_file(pairs);
     auto t1 = high_resolution_clock::now();
-    uint32_t line = euler99(pairs);
+    uint32_t line = euler99_st(pairs);
     auto t2 = high_resolution_clock::now();
     auto ms_int = duration_cast<nanoseconds>(t2 - t1);
 
