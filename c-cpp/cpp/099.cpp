@@ -3,12 +3,15 @@
 #include <cstdint>
 #include <cstdio>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <sys/types.h>
 #include <thread>
 #include <vector>
+
+#include "ctrack.hpp"
 
 using std::chrono::duration;
 using std::chrono::duration_cast;
@@ -22,14 +25,15 @@ typedef struct {
     double logexp;
 } base_exp_t;
 
-double get_log(base_exp_t &p) {
+double get_log(const base_exp_t &p) {
     return (double)p.exponent * log10((double)p.base);
 }
 
-uint32_t solution_part(
-		std::vector<base_exp_t> &pairs,
+void solution_part(
+		const std::vector<base_exp_t> &pairs,
 		uint32_t begin,
-		uint32_t end
+		uint32_t end,
+		uint32_t &res
 		) {
 	
     double highest = 0;
@@ -43,7 +47,38 @@ uint32_t solution_part(
             line = i;
         }
     }
-	return line;
+	res = line;
+}
+
+uint32_t euler99_mt(std::vector<base_exp_t> &pairs) {
+	CTRACK;
+    int line = 0;
+	uint32_t left = 0;
+	uint32_t middle = pairs.size() / 2;
+	uint32_t end = pairs.size();
+	
+	uint32_t leftMax = 0;
+	uint32_t rightMax = 0;
+	std::thread t1(solution_part, std::cref(pairs), left, middle, std::ref(leftMax));
+	std::thread t2(solution_part, std::cref(pairs), middle, end, std::ref(rightMax));
+	/*
+	uint32_t leftMax = solution_part(
+			pairs,
+			left,
+			middle
+	);
+	uint32_t rightMax = solution_part(
+			pairs,
+			middle,
+			end
+	);
+	*/
+	t1.join();
+	t2.join();
+	line = leftMax;
+	if ( rightMax > leftMax)
+		line = rightMax;
+    return line + 1;
 }
 
 uint32_t euler99_st(std::vector<base_exp_t> &pairs) {
@@ -64,29 +99,6 @@ uint32_t euler99_st(std::vector<base_exp_t> &pairs) {
     }
 
 	return line;
-}
-
-uint32_t euler99_mt(std::vector<base_exp_t> &pairs) {
-	CTRACK;
-    int line = 0;
-	uint32_t left = 0;
-	uint32_t middle = pairs.size() / 2;
-	uint32_t end = pairs.size();
-	
-	uint32_t leftMax = solution_part(
-			pairs,
-			left,
-			middle
-	);
-	uint32_t rightMax = solution_part(
-			pairs,
-			middle,
-			end
-	);
-	line = leftMax;
-	if ( rightMax > leftMax)
-		line = rightMax;
-    return line + 1;
 }
 
 int read_file(std::vector<base_exp_t> &pairs) {
@@ -122,9 +134,9 @@ int main() {
     read_file(pairs);
     auto t1 = high_resolution_clock::now();
 	uint32_t line = 0;
-	for (int32_t i = 0; i < 1000000; i++)
-		uint32_t line = euler99_st(pairs);
-	    //uint32_t line_mt = euler99_mt(pairs);
+	for (int32_t i = 0; i < 1; i++)
+		//uint32_t line = euler99_st(pairs);
+	    uint32_t line_mt = euler99_mt(pairs);
     auto t2 = high_resolution_clock::now();
     auto ms_int = duration_cast<nanoseconds>(t2 - t1);
 

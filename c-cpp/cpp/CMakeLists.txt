@@ -7,4 +7,5 @@ foreach(CPP_FILE ${CPP_SRC})
     add_executable(${CPP_EXE} ${CPP_FILE})
 endforeach()
 
+target_link_libraries(cpp_099 PRIVATE ctrack)
 
