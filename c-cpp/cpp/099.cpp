@@ -47,7 +47,7 @@ uint32_t solution_part(
 }
 
 uint32_t euler99_st(std::vector<base_exp_t> &pairs) {
-
+	CTRACK;
     double highest = 0;
     int linei = 1;
     int line = 0;
@@ -67,9 +67,7 @@ uint32_t euler99_st(std::vector<base_exp_t> &pairs) {
 }
 
 uint32_t euler99_mt(std::vector<base_exp_t> &pairs) {
-
-    double highest = 0;
-    int linei = 1;
+	CTRACK;
     int line = 0;
 	uint32_t left = 0;
 	uint32_t middle = pairs.size() / 2;
@@ -123,11 +121,15 @@ int main() {
     std::vector<base_exp_t> pairs;
     read_file(pairs);
     auto t1 = high_resolution_clock::now();
-    uint32_t line = euler99_st(pairs);
+	uint32_t line = 0;
+	for (int32_t i = 0; i < 1000000; i++)
+		uint32_t line = euler99_st(pairs);
+	    //uint32_t line_mt = euler99_mt(pairs);
     auto t2 = high_resolution_clock::now();
     auto ms_int = duration_cast<nanoseconds>(t2 - t1);
 
     std::printf("Line with highest result: %d\n", line);
     std::printf("duration %lfms\n", ((double)ms_int.count()) * (pow(10, -6)));
+	ctrack::result_print();
     return 0;
 }
